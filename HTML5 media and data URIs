@@ -1,0 +1,175 @@
+Skip to contentID 
+About Blog Projects Writing Books Contact
+HTML5 media and data URIs
+
+§
+←Back to listing16 September 2012
+In a recent email conversation with Slava Paperno of Cornell University who builds applications for language teachers, he brought something to my attention that I was unaware of. Namely that HTML5 audio and video also accept Data URIs as a source, as well as standard file URLs.
+
+I must admit that I’m not sure why I wasn’t aware of this before, but sometimes things are staring you in the face and you refuse to see them, as this is such an occasion.
+
+Data URI
+
+A Data URI takes the format:
+data:[<MIME-type>][;charset=<encoding>][;base64],<data>
+The MIME-type specifies what type of data the URI contains. So if you wanted to provide a data URI for an image you would specify it as follows:
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA 
+AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO 
+9TXL0Y4OHwAAAABJRU5ErkJggg==" alt="Red dot" />
+The MIME type used here is image/png indicating that the encoded data is a PNG image.
+
+Audio
+
+Similarily, if you wanted to encode an Ogg audio file, you would use the MIME type audio/ogg as follows:
+<audio controls src="data:audio/ogg;base64,T2dnUwACAAAAAAAAAAA+..........+fm5nB6slBlZ3Fcha363d5ut7u3ni1rLoPf728l3KcK" />
+If you want to specify an MP3 file you would simply set the MIME type to audio/mp3 and provide the encoded MP3 audio data string.
+
+See an example of a data URI audio source.
+
+Video
+
+Providing a data URI for an encoded video is just the same, providing the correct MIME type for the correct encoded data, and of course they can be used in conjunction with the source element:
+<video controls> 
+  <source type="video/webm" src="data:video/webm;base64,GkXfowEAAAAAAAAfQoaBAUL3gQFC8......jVOrhB9DtnVTrIMQTPc="> 
+  <source type="video/mp4" src="data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wNDJpc29....../l/L+X8v5AAAAMgfDg=="> 
+</video>
+See an example of a data URI video source.
+
+Encoding in base64
+
+Of course the code examples provided above don’t display the full data URI for any of the audio and video files as they would fill the entire page! To encode the data I simply used PHP‘s base64_encode function as follows:
+function getEncodedVideoString($type, $file) { 
+   return 'data:video/' . $type . ';base64,' . base64_encode(file_get_contents($file)); 
+}
+Which was used by the HTML:
+<video controls> 
+   <source type="video/webm" src="<?php echo getEncodedVideoString('webm', 'parrots-small.webm'); ?>"> 
+   <source type="video/mp4" src="<?php echo getEncodedVideoString('mp4', 'parrots-small.mp4');?>"> 
+</video>
+Of course you can use whatever you like to encode the files, this is just an example. And while you may not want nor need to base64 encode your audio and video files (these reasons on why you might base64 encode images might be just as relevant), it’s still good to know that you can should the need arise.
+
+19 Responses
+
+bruce 17 September 2012 at 08:56
+My fellow Operative, p01, used the technique in his 1K speech synthesiser. http://www.p01.org/releases/JS1K_Speech_Synthesizer/
+
+I considered doing it for the Hixie keyboard shiny demo http://shinydemos.com/hixie-keyboard/, to reduce HTTP requests but decided against it – the demo was designed to show event-driven multimedia rather than classy optimisation.
+
+Mark 17 September 2012 at 09:27
+See also http://syntensity.com/static/espeak.html which I believe dynamically creates a wav. We used this to dynamically generate audio in this demo :
+http://futurebroadcasts.com/
+
+Pingback: Bruce Lawson’s personal site  : Reading List
+
+Pingback: Some links for light reading (17/10/12) | Max Design
+
+Michelangelo 17 October 2012 at 16:19
+I am still not clear on which scenarios make data URIs preferable over linked files. Could you expand on that?
+
+Ian 17 October 2012 at 16:30
+Hi Michelangelo, thanks for the comment. One example might be if you had a list of short video thumbnails that you wanted to display. Linking to individual files would greatly increase the number of HTTP requests but using data URIs for each video would reduce that. It would of course increase the amount of data that is returned when the page is loaded initially though, but that might be preferable.
+
+The article I linked to at the end, which discusses why you would use data URIs for images should give you more of an idea.
+
+Pingback: IT Digest: Apple’s iPad Mini, Gmail Search, Surface by Microsoft and Much More | Zfort Group Blog
+
+Pingback: Дайджест интересных новостей и материалов из мира IT за последнюю неделю №27 (13 — 19 октября 2012) | Android helper
+
+Pingback: HTML5 media and data URIs | Note to self
+
+Kiran Chandra 25 June 2013 at 16:01
+Hi Ian Devlin,
+
+Its not working in iPad and iPhone safari, you know why? Does mobile browser not started supporting?
+
+Faldo1 11 May 2014 at 15:59
+Hello all,
+
+I have a strange bug using base64 encoded video, maybe could you help me to explain it.
+
+I have a web service that returns a video as Base64 data (note: I suppose there is no reference to the web server address in the base64-encoded video data 😉 )
+
+In my javascript, I set
+
+myVideoPlayer.src = myBase64VideoData
+
+The video plays well, image and sound
+
+Now, I want to take a snapshot of my video and I do
+
+…
+mySnapshotCanvas.getContext(‘2d’).drawImage(myVideoPlayer, …)
+…
+
+And I have to generate sprites from that snapshot.
+
+I do
+
+…
+mysprite.getContext(‘2d’).drawImage(mySnapshotCanvas, x0, y0, width, height)
+…
+
+But now, if I try to analyze my sprite with
+
+…
+mysprite.getContext(‘2d’).getImageData(x0, y0, width, height)
+…
+
+=> it works in Chrome and IE, but it fails in Firefox with error message: “this operation is insecure”. It looks like a CORS problem.
+
+It works in Firefox when I replace the base64 data with the uri of the original video
+
+It seems the video.src = base64data may generate CORS problems with Firefox.
+
+Any idea ?
+
+Thanks for all.
+
+mtminded 02 July 2014 at 13:26
+seems to be an interesting alternative for small bands, that want to provide their songs on their homepages, without giving the visitor (or some crawlers) the opportunity to download the mp3 files from the webserver. (and using soundcloud or similar plugins is sometimes no option – due to page design)
+
+i’ll try to rebuild my html5 player using this. some questions though:
+– could i submit the base64 encoded data gz compressed?
+– how will song-buffering work? since the data is now included in the html, i suppose you’ll have to wait, until the song is completely loaded, before playing it?
+
+vlad 25 October 2014 at 21:26
+hello.. i try this code with google drive videos the source is like this (https://googledrive.com/host/0B_4b_1HlxqypYmlncHBEUE03aU0/%5Ban1me.info%5D%20Gintama%20001.mp4) and is not working why??
+
+John Xiao 26 October 2014 at 04:20
+Mobile Safari can not play base64 audio, neither ogg nor mp3.
+
+Paul D. Waite 06 March 2015 at 18:43
+@JohnXiao: it plays base64-encoded MP3 in iOS 8.
+
+John Walker 30 September 2015 at 14:19
+I just crashed a firefox browser with a 12Mb audio file encoded as a DataURL. I could be running out of memory.
+
+Winson 12 December 2015 at 14:43
+not work on Google Chrome for me. i did many tests.
+
+Richard Bailey 28 July 2016 at 09:34
+Why does “See an example of a data URI video source.” not work under my Internet Explorer 11?. I am also seeing this problem in my work. See:
+http://www.rtbaileyphd.com/src/testjunk/HTML5VideoProblem.out.html
+
+Sparky Pop 14 September 2016 at 22:01
+I’m desperately trying to block certain videos in my browser. This HTML5 “feature” allows videos to be pushed to my browser with all of the measures I’ve taken so far. How can I determine the URL of the video to block the domain providing that one video I really, really want to block? Thanks for your guidance…
+
+Make a comment
+
+Comment
+
+
+Name
+
+
+Email
+
+
+Website
+
+
+Post Comment
+
+Search articles
+  Search
+Copyright © Ian Devlin MMIV - MMXVII
